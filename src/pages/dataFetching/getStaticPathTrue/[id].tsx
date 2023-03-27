@@ -5,7 +5,7 @@ import styles from '@bootcamp/styles/Home.module.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export default function Home() {
+function Home({game}: {game: {id: string; title: string; thumbnail: string; shortDescription: string;}}) {
   return (
     <>
       <Head>
@@ -40,23 +40,12 @@ export default function Home() {
         </div>
 
         <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-          <div className={styles.thirteen}>
-            <Image
-              src="/thirteen.svg"
-              alt="13"
-              width={40}
-              height={31}
-              priority
-            />
+          <div className='card'>
+            <Image alt={game?.shortDescription} src={game?.thumbnail} width={100} height={100}/>
           </div>
+          <ul>
+            <li key={game?.id}>{game?.title}</li>
+          </ul>
         </div>
 
         <div className={styles.grid}>
@@ -120,4 +109,34 @@ export default function Home() {
       </main>
     </>
   )
+
 }
+
+export async function getStaticPaths() {
+  return {
+    paths: [
+        { params: { id: '1' } },
+        { params: { id: '2' } },
+      ],
+      fallback: true, // false or "blocking" // See the "fallback" section below
+  };
+}
+
+export const getStaticProps = async ({params}: any) => {
+  console.log('getStaticPropsTrue', params);
+  const res = await fetch(`https://www.freetogame.com/api/game?id=${params.id}`)
+  const game = await res.json()
+
+  return {
+    props: {
+      game: {
+        id: game?.id,
+        title: game?.title,
+        thumbnail: game?.thumbnail,
+        shortDescription: game?.short_description,
+      },
+    },
+  }
+};
+
+export default Home;
